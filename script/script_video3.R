@@ -6,7 +6,7 @@ library(performance) # check model assumptions
 library(arm) # for binned residuals plot
 
 # Let's look at some binomial data
-regressions_data <- read_csv("https://raw.githubusercontent.com/ajstewartlang/15_mixed_models_pt1/master/data/regressions.csv")
+regressions_data <- read_csv("https://raw.githubusercontent.com/ajstewartlang/16_mixed_models_pt2/master/data/regressions.csv")
 
 str(regressions_data)
 
@@ -14,9 +14,13 @@ tidied_regressions_data <- regressions_data %>%
   transmute(subject = factor(Subject), item = factor(Item), 
             condition = factor(Condition), DV = DV)
 
+str(tidied_regressions_data)
+
+head(tidied_regressions_data)
+
 tidied_regressions_data %>%
   group_by(condition) %>%
-  summarise(mean_DV = mean(DV))
+  summarise(mean_DV = mean(DV), sd_DV = sd(DV))
 
 binomial_model <- glmer(DV ~ condition + (1 + condition | subject) +
                           (1 + condition | item), data = tidied_regressions_data,
@@ -35,5 +39,11 @@ binomial_model_null <- glmer(DV ~ (1 | subject),
 
 anova(binomial_model, binomial_model_null)
 
+tidied_regressions_data %>%
+  group_by(condition, DV) %>%
+  summarise(n())
+
 # We would expect 95# of residuals to fall between jagged line (+- 2SEs)
 binnedplot(fitted(binomial_model), resid(binomial_model,type="response"))
+
+# Let's look at some ordinal data
