@@ -46,7 +46,7 @@ In this first case imagine that we have a 2 x 2 repeated measures design. The fi
 
 Let's first load the libraries that we're going to use.
 
-```{r}
+```{r, message=FALSE}
 library(tidyverse)
 library(lme4)
 library(lmerTest)
@@ -56,7 +56,7 @@ library(performance)
 
 Now we're going to read in our data and turn our `subject`, `item`, `context`, and `sentence` columns into factors.
 
-```{r}
+```{r, message=FALSE}
 factorial_data <- read_csv("https://raw.githubusercontent.com/ajstewartlang/15_mixed_models_pt1/master/data/2x2.csv")
 
 tidied_factorial_data <- factorial_data %>%
@@ -64,7 +64,56 @@ tidied_factorial_data <- factorial_data %>%
             context = factor(Context), sentence = factor(Sentence))
 ```
 
+When we generate summary statistics, we encounter the issues of NAs where we expected to see mean values. 
 
+```{r}
+tidied_factorial_data %>%
+  group_by(context, sentence) %>%
+  summarise(mean_rt = mean(RT), sd_rt = sd(RT))
+```
+
+This indicates we likely have missing data. R never decides what it should do about missing data - you need to make that decision. Let's use the {visdat} package to investigate...
+
+```{r}
+library(visdat)
+```
+
+```{r}
+vis_miss(tidied_factorial_data)
+```
+
+We can calculate how much data RT is missing another way... 
+
+```{r}
+tidied_factorial_data %>%
+  filter(is.na(RT)) %>%
+  count()
+```
+
+So we can see we have 12 missing data points. We can filter our cases where we have missing data and re-do our summary statistics.
+
+```{r}
+tidied_factorial_data %>%
+  filter(!is.na(RT)) %>%
+  group_by(context, sentence) %>%
+  summarise(mean_rt = mean(RT), sd_rt = sd(RT))
+```
+
+Let's visualise the data next. I'm using the `stat_summary()` function to add means and bootstrapped condidence intervals around those means for each of our conditions. I use the syntax `context:sentence` in the `aes()` expression to indicate that I want to plot all combinations of these two factors (i.e., the interactions). I use a few other aesthetic tweaks to make the graph look a little better than the default.
+
+```{r}
+tidied_factorial_data %>%
+  filter(!is.na(RT)) %>%
+  ggplot(aes(x = context:sentence, y = RT, colour = context:sentence)) +
+  geom_violin() +
+  geom_jitter(width = .1, alpha = .2) +
+  stat_summary(fun.data = "mean_cl_boot", colour = "black") +
+  guides(colour = FALSE) +
+  labs(x = "Context X Sentence",
+       y = "RT (ms.)") +
+  theme_minimal() +
+  coord_flip()
+```
 
 # Your Challenge
 
