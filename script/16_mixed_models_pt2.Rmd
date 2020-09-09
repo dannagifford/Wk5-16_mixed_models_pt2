@@ -165,13 +165,13 @@ On the Cullen and Frey plot we see our data is quite close to a Gamma distributi
 ```{r}
 gamma_factorial_model <- glmer(RT ~ context * sentence + 
                           (1 + context + sentence | subject) +
-                          (1 + context + sentence | item), 
+                          (1 + sentence | item), 
                           family = Gamma,
                           nAGQ = 0,
                           data = tidied_factorial_data)
 ```
 
-In order to fit this model, I had to se nAGQ to 0 (its default is 1). This means our parameter estimates are a little less exact than if we had gone with the default (but at least the model converges on a solution). 
+In order to fit this model, I had to simplify the random effects terms and set nAGQ to 0 (its default is 1). This means our parameter estimates are a little less exact than if we had gone with the default (but at least the model converges on a solution). 
 
 Let's look at the summaries of our two models and see if they differ. First we'll look at our `factorial_model` which we built using `lmer()`.
 
@@ -186,7 +186,23 @@ What about our Gamma model built using `glmer()`?
 summary(gamma_factorial_model)
 ```
 
-OK, this is good. The same story emerges - a main effect of `Context` and an interaction between `Context` and `Sentence`. Note that the *p*-values are a lot lower here as our random effects terms didn't include any random slopes. 
+OK, this is interesting. The interaction between `Context` and `Sentence` is still there but the main effect of `Context` is now non-significant. In a sense this doesn't matter too much, as the interaction between our two factors tells us we shouldn't pay too much attention to main effects anyway. Note that the *p*-values are a lot lower here as our random effects terms didn't include any random slopes. You are probably fine to report either tha results of the LMM or the GLMM. Which you choose, be transparent and open when you report them. Indeed, you might even want to report both models but highlight the fact that the interaction term is significant regardless of which model is chosen.
+
+To interpret the interaction, you'll need to run pairwise comparisons using `emmeans()`.
+
+```{r}
+emmeans(factorial_model, pairwise ~ context*sentence, adjust = "none")
+```
+
+We can see the interaction is being driven by reading times to Negative sentences in Negative vs. Positive contexts. 
+
+Is this also the case for our Gamma model?
+
+```{r}
+emmeans(gamma_factorial_model, pairwise ~ context*sentence, adjust = "none")
+```
+
+Yes, the interaction is being driven by reading times to Negative sentences in Negative vs. Positive contexts. 
 
 # Your Challenge
 
