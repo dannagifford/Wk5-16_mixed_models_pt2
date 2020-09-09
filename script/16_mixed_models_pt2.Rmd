@@ -99,7 +99,7 @@ tidied_factorial_data %>%
   summarise(mean_rt = mean(RT), sd_rt = sd(RT))
 ```
 
-Let's visualise the data next. I'm using the `stat_summary()` function to add means and bootstrapped condidence intervals around those means for each of our conditions. I use the syntax `context:sentence` in the `aes()` expression to indicate that I want to plot all combinations of these two factors (i.e., the interactions). I use a few other aesthetic tweaks to make the graph look a little better than the default.
+Let's visualise the data next. I'm using the `stat_summary()` function to add means and bootstrapped condidence intervals around those means for each of our conditions. I use the syntax `context:sentence` in the `aes()` expression to indicate that I want to plot all combinations of these two factors (i.e., the interactions). I use a few other aesthetic tweaks to make the graph look a little better than the default. I should have added a title - can you modify the code below to do that?
 
 ```{r}
 tidied_factorial_data %>%
@@ -115,7 +115,81 @@ tidied_factorial_data %>%
   coord_flip()
 ```
 
+Before we build our model, we need to set the contrast coding for our factors. By default, R using dummy (treatment) coding (think back to how we used this in the context of understanding ANOVA as a case of regression). The problem with dummy coding for factorial designs is that you can end up misinterpreting simple effects (e.g., an effect of Factor 2 at one level of Factor 1) as a main effect (e.g., an effect of Factor 2 at the average of Factor 1). To address this, we can use sum or deviation coding. This will result in the Intercept of our model correspoding to the grand mean of our conditions (i.e., the mean of means) and makes the interpretation of our fixed effects (and any interaction effects) more straightforward. 
+
+If you're interested in reading more about this topic, I recommend this great paper by Schad and colleagues. Just click on the image below to be access it.
+
+<center>
+
+[![Link to Schad paper](../images/schad_et_al.png){width=75%}](https://www.sciencedirect.com/science/article/pii/S0749596X19300695)
+
+</center>
+
+Let's set the contrast coding of our factors using deviation coding as follows. This will allow us to compare each of our conditions to the average of the other conditions.
+
+```{r}
+contrasts(tidied_factorial_data$context) <- matrix(c(.5, -.5))
+contrasts(tidied_factorial_data$sentence) <- matrix(c(.5, -.5))
+```
+
+Now that our contrasts are coded we can go ahead and build our mixed model. Note that the maximal model did not converge so we dropped the interaction term (`context:sentence`) from our subject random effect. For this random effect, we are modelling just additive effects of `context` and `sentence`.
+
+```{r}
+factorial_model <- lmer(RT ~ context * sentence + 
+                          (1 + context + sentence | subject) +
+                          (1 + context * sentence | item), 
+                        data = tidied_factorial_data)
+```
+
+Let's check the assumptions of our model.
+
+```{r}
+check_model(factorial_model)
+```
+
+So it looks like we may have an issue with the normality of our residuals. Things looks ok apart from the right 20% of our residuals. We may want to try to model under a different distribution. We can plot our RT values on a Cullen and Frey plot.
+
+```{r, warning=FALSE}
+library(fitdistrplus)
+```
+
+```{r}
+missing_data_removed <- tidied_factorial_data %>%
+  filter(!is.na(RT))
+  
+descdist(missing_data_removed$RT)
+```
+
+On the Cullen and Frey plot we see our data is quite close to a Gamma distribution. We can try to model our data using a generalised linear model assuming sampling from the Gamma distribution as follows. One of the challenges with such models is that very often the random effects structure needs to be radically simplified. This can increase the Type I error rate and may result in us thinking we have an effect when really we don't. This is one of the challenges of building models in general. To paraphrase George Box, all models are wrong but some are useful. Let's try to build a Gamma model anyway. 
+
+```{r}
+gamma_factorial_model <- glmer(RT ~ context * sentence + 
+                          (1 + context + sentence | subject) +
+                          (1 + context + sentence | item), 
+                          family = Gamma,
+                          nAGQ = 0,
+                          data = tidied_factorial_data)
+```
+
+In order to fit this model, I had to se nAGQ to 0 (its default is 1). This means our parameter estimates are a little less exact than if we had gone with the default (but at least the model converges on a solution). 
+
+Let's look at the summaries of our two models and see if they differ. First we'll look at our `factorial_model` which we built using `lmer()`.
+
+```{r}
+summary(factorial_model)
+```
+So we have a main effect of `Context` and an interaction between `Context` and `Sentence`.
+
+What about our Gamma model built using `glmer()`?
+
+```{r}
+summary(gamma_factorial_model)
+```
+
+OK, this is good. The same story emerges - a main effect of `Context` and an interaction between `Context` and `Sentence`. Note that the *p*-values are a lot lower here as our random effects terms didn't include any random slopes. 
+
 # Your Challenge
+
 
 
 
