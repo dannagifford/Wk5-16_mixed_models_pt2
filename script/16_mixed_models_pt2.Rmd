@@ -39,6 +39,33 @@ You can download the slides in .odp format by clicking [here](../slides/Mixed_Mo
 
 Once you've watched the video above, run the code below on your own machines.
 
+## Mixed Models
+### 2 x 2 Factorial Design
+
+In this first case imagine that we have a 2 x 2 repeated measures design. The first factor is Context (Negative vs. Positive) and the second is Sentence Type (Negative vs. Positive). The DV is reading time duration to a Target Sentence (measured in ms.). We have 60 subjects, and 28 items.
+
+Let's first load the libraries that we're going to use.
+
+```{r}
+library(tidyverse)
+library(lme4)
+library(lmerTest)
+library(emmeans)
+library(performance)
+```
+
+Now we're going to read in our data and turn our `subject`, `item`, `context`, and `sentence` columns into factors.
+
+```{r}
+factorial_data <- read_csv("https://raw.githubusercontent.com/ajstewartlang/15_mixed_models_pt1/master/data/2x2.csv")
+
+tidied_factorial_data <- factorial_data %>%
+  mutate(subject = factor(Subject), item = factor(Item), RT = RT,
+            context = factor(Context), sentence = factor(Sentence))
+```
+
+
+
 # Your Challenge
 
 
