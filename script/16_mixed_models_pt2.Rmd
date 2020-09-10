@@ -31,7 +31,7 @@ You can download the slides in .odp format by clicking [here](../slides/Mixed_Mo
 
 <center>
 
-[![Link to Data Visualisation slides](../images/mixed_models_pt2.png){width=75%}](../slides/Mixed_Models_Part_2.pdf)
+[![Link to slides](../images/mixed_models_pt2.png){width=75%}](../slides/Mixed_Models_Part_2.pdf)
 
 </center>
 
@@ -203,6 +203,103 @@ emmeans(gamma_factorial_model, pairwise ~ context*sentence, adjust = "none")
 ```
 
 Yes, the interaction is being driven by reading times to Negative sentences in Negative vs. Positive contexts. 
+
+## Binomial Data
+
+In the following video I will examine how you build a generalised linear mixed model where your dependent variable isn't continuous. I'll focus on binomial data (where your DV is either a 1 or a 0).
+
+[video 2]
+
+Once you've watched the video above, run the code below on your own machines.
+
+### One Factor With Three Levels
+
+In an eye-movement study we measured readers’ regressions as they read sentences. We had sentences conveying three different types of meaning (Negative ve. Neutral vs. Positive). For each, we measures where people did or did not make a regressive eye-movement. This is our DV and is coded as 0 or 1. We had 24 subjects and 24 items.
+
+First, let's read in the data and ensure the appropriate columns are coded as factors.
+
+```{r, message=FALSE}
+regressions_data <- read_csv("https://raw.githubusercontent.com/ajstewartlang/16_mixed_models_pt2/master/data/regressions.csv")
+
+tidied_regressions_data <- regressions_data %>%
+  mutate(Subject = factor(Subject), Item = factor(Item), 
+         Condition = factor(Condition), DV = DV)
+
+str(tidied_regressions_data)
+```
+
+Let's work out some descriptives - for each of the three conditions we can calculate the average number of eye-movement regressions (and the associated standard deviation).
+
+```{r}
+tidied_regressions_data %>%
+  group_by(Condition) %>%
+  summarise(mean_DV = mean(DV), sd_DV = sd(DV))
+```
+
+So, in terms of the average number of eye-movement regressions, things look pretty similar from condition to condition. Let's build a binomial model to check.
+
+The maximal model (i.e., with random intercepts and slopes for our subjects and for our items) doesn't converge so we need to simplify the random effects structure. The following is the most complex one we can find to fit our data. Note, we are using the `glmer()` function and specifying the distribution family as `binomial`.
+
+```{r}
+binomial_model <- glmer(DV ~ Condition + (1 | Subject), 
+                        data = tidied_regressions_data,
+                        family = binomial)
+```
+
+```{r}
+summary(binomial_model)
+```
+
+So, it doesn't look like there's much going on in our data. We can also compare the binomial model with the fixed effect (above) to a model with only the random effect.
+
+```{r}
+null_binomial_model <- glmer(DV ~ (1 | Subject), 
+                        data = tidied_regressions_data,
+                        family = binomial)
+```
+
+We can then use the Likilhood Ratio Test to see if they differ (they don't).
+
+```{r}
+anova(binomial_model, null_binomial_model)
+```
+
+If our binomial model (or the comparison between our binomial and null model) suggested an effect, we would use the `emmeans()` package to run pairwise comparisons between the different levels of our factor (as we did previously). We would also check our model assumptions by creating a binned residuals plots as I have done in the video above.
+
+## Ordinal Data
+
+In this final video in this session we will examine how to model ordinal data. Such data are quite common, and people often (incorrectly) model them using ANOVA. However, as the data are ordinal (where differences between adjacent points may not be equivalent), rather than continuous, this is not appropriate. 
+
+[video 3]
+
+Imagine we had 42 participants rate images of sports on a scale of 0-10 corresponding to how much they liked each one. Before each rating measure, they saw a video of a sport that matched or mismatched the one they then had to rate (with a neutral video as baseline).
+
+We're going to use the `{ordinal}` package so let's load that into our library.
+
+```{r, message=FALSE}
+library(ordinal)
+```
+
+Let's read in our data an ensure our columns are coded appropriately. Our VideoCondition column is currently coded as 2, 3, or 4. 2 corresponds to the Match condition, 3 to Mismatch, and 4 as Neutral. Let's recode the levels of that factor with the labels instead of the numbers.
+
+Note, I am using the `select()` function to select the 4 key columns we need for our analysis. I have had to put `dplyr::` beforehand so that R know that it's the `select()` function that's part of the `{dplyr}` package from the `Tidyverse` that we want to use. There's also a function called `select()` in the `{MASS}` package - oftentimes you will have both the `Tidyverse` packages and `{MASS}` loaded so it's important to remember that you may need to make explicit which version of a particular function you want to use. 
+
+```{r}
+ordinal_data_tidied <- ordinal_data %>%
+  mutate(Subject = factor(Subject), SportsType = factor(SportType)) %>%
+  mutate(Ratings = ratings) %>%
+  mutate(VideoCondition = as.character(VideoCondition)) %>%
+  mutate(VideoCondition = factor(recode(VideoCondition, "2" = "Match", 
+                                        "3" = "Mismatch", "4" = "Neutral"))) %>%
+  dplyr::select(Subject, SportType, VideoCondition, Ratings)
+```
+
+We need to do one more thing before our data set is ready for modelling. We need to make sure that our DV is coded as an ordered factor. We can do that simply with the following. Remember, the name after the `$` symbol refers to the column name in the data frame that preceded the `$`.
+
+```{r}
+ordinal_data_tidied$Ratings <- as.ordered(ordinal_data_tidied$Ratings)
+```
+
 
 # Your Challenge
 

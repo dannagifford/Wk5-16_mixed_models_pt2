@@ -59,13 +59,14 @@ summary(factorial_model)
 
 emmeans(factorial_model, pairwise ~ context*sentence, adjust = "none")
 
-factorial_model_gamma <- glmer(RT ~ context * sentence + 
-                                 (1 | subject) +
-                                 (1 | item), 
-                               data = tidied_factorial_data,
-                               family = Gamma)
+gamma_factorial_model <- glmer(RT ~ context * sentence + 
+                                 (1 + context + sentence | subject) +
+                                 (1 + sentence | item), 
+                               family = Gamma,
+                               nAGQ = 0,
+                               data = tidied_factorial_data)
 
-check_model(factorial_model_gamma)
+check_model(gamma_factorial_model)
 
 summary(factorial_model_gamma)
 
