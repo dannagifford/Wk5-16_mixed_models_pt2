@@ -304,14 +304,44 @@ ordinal_data_tidied$Ratings <- as.ordered(ordinal_data_tidied$Ratings)
 
 Let's have a look at our data.
 
-```{r}
+```{r, warning=FALSE}
 ordinal_data_tidied %>%
   ggplot(aes(x = VideoCondition, y = Ratings, group = VideoCondition)) +
   geom_jitter(aes(colour = VideoCondition), width = .1, alpha = .25, size = 5) + 
   theme_minimal() +
   guides(colour = FALSE) +
-  theme(text = element_text(size = 20)) +
+  theme(text = element_text(size = 18)) +
   stat_summary(fun = "median", size = 2, alpha = .5)
+```
+
+It does look as if the Mismatch condition has a lower average rating than the other two. Let's build our ordinal mixed model to investigate. Note, we use the `clmm()` function from the `{ordinal}` package to do this. The syntax is pretty similar to that used in the `{lme4}` models.
+
+```{r}
+ordinal_model <- clmm(Ratings ~ VideoCondition + 
+                        (1 + VideoCondition | Subject) +
+                        (1 + VideoCondition | SportType), 
+                      data = ordinal_data_tidied)   
+```
+
+Let's also build a null model (i.e., with no fixed effects) to see how it compares to the one above.
+
+```{r}
+null_ordinal_model <- clmm(Ratings ~ 1 + 
+                        (1 + VideoCondition | Subject) +
+                        (1 + VideoCondition | SportType), 
+                      data = ordinal_data_tidied)   
+
+anova(ordinal_model, ordinal_model_null)
+```
+
+```{r}
+summary(ordinal_model)
+```
+
+Let's examine which condition differs from each other condition using `{emmeans}`.
+
+```{r}
+emmeans(ordinal_model, pairwise ~ VideoCondition)
 ```
 
 
