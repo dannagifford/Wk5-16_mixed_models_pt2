@@ -267,12 +267,13 @@ anova(binomial_model, null_binomial_model)
 If our binomial model (or the comparison between our binomial and null model) suggested an effect, we would use the `emmeans()` package to run pairwise comparisons between the different levels of our factor (as we did previously). We would also check our model assumptions by creating a binned residuals plots as I have done in the video above.
 
 ## Ordinal Data
+### One Factor With Three Levels
 
 In this final video in this session we will examine how to model ordinal data. Such data are quite common, and people often (incorrectly) model them using ANOVA. However, as the data are ordinal (where differences between adjacent points may not be equivalent), rather than continuous, this is not appropriate. 
 
 [video 3]
 
-Imagine we had 42 participants rate images of sports on a scale of 0-10 corresponding to how much they liked each one. Before each rating measure, they saw a video of a sport that matched or mismatched the one they then had to rate (with a neutral video as baseline).
+Imagine we had 42 participants rate images of sports on a scale of 0-10 corresponding to how much they liked each one. Before each rating measure, they saw a video of a sport - called SportType - that matched or mismatched the one they then had to rate (with a neutral video as baseline). Our DV is `Rating` and our fixed effect is `Condition` (Match vs. Mismatch vs. Neutral).
 
 We're going to use the `{ordinal}` package so let's load that into our library.
 
@@ -307,10 +308,10 @@ Let's have a look at our data.
 ```{r, warning=FALSE}
 ordinal_data_tidied %>%
   ggplot(aes(x = VideoCondition, y = Ratings, group = VideoCondition)) +
-  geom_jitter(aes(colour = VideoCondition), width = .1, alpha = .25, size = 5) + 
+  geom_jitter(aes(colour = VideoCondition), width = .1, alpha = .25, size = 1) + 
   theme_minimal() +
   guides(colour = FALSE) +
-  theme(text = element_text(size = 18)) +
+  theme(text = element_text(size = 14)) +
   stat_summary(fun = "median", size = 2, alpha = .5)
 ```
 
@@ -330,8 +331,10 @@ null_ordinal_model <- clmm(Ratings ~ 1 +
                         (1 + VideoCondition | Subject) +
                         (1 + VideoCondition | SportType), 
                       data = ordinal_data_tidied)   
+```
 
-anova(ordinal_model, ordinal_model_null)
+```{r}
+anova(null_ordinal_model, ordinal_model)
 ```
 
 ```{r}
@@ -344,11 +347,23 @@ Let's examine which condition differs from each other condition using `{emmeans}
 emmeans(ordinal_model, pairwise ~ VideoCondition)
 ```
 
+The pairwise comparisons indicate that the Match vs Mismatch conditions differ from each other, as do the Match vs. Neutral conditions. You can change the adjustment for multiple comparisons using the `adjust = ` parameter in `emmeans()`. Does the same story emerge when you use the Bonferroni adjustment?
+
+```{r, eval=FALSE}
+emmeans(ordinal_model, pairwise ~ VideoCondition, adjust = "Bonferroni")
+```
 
 # Your Challenge
 
+Read in the data file from here:
 
+`https://raw.githubusercontent.com/ajstewartlang/16_mixed_models_pt2/master/data/accuracy_data.csv`
 
+These data are from a study where 32 partcipants saw images of 32 faces and had to classify images as whether each was happy or sad. We want to determine whether people were more accurate (indicatad by a 1 in the Acc column) for Sad or Happy faces (FaceExpression column). Our random effects are `Subject` and `Face` (which corresponds to the trial ID).
+
+Build the appropriate generalised linear mixed model to model the binomial outcome variable (`Acc`) and determine whether it was predicted by the fixed effect of `FaceExpression`. Model both `Subject` and `Face` as random effects. 
+
+Your probably found that you needed to simplify your random effects structure due to over-parameterisation - indicated by a `singular fit` warning. Once you were able to build a model that didn't produce this error, you should have found that accuracy was significantly better for `Sad` than for `Happy` faces.
 
 ## Improve this Workshop
 
