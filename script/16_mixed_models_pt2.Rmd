@@ -284,7 +284,9 @@ Let's read in our data an ensure our columns are coded appropriately. Our VideoC
 
 Note, I am using the `select()` function to select the 4 key columns we need for our analysis. I have had to put `dplyr::` beforehand so that R know that it's the `select()` function that's part of the `{dplyr}` package from the `Tidyverse` that we want to use. There's also a function called `select()` in the `{MASS}` package - oftentimes you will have both the `Tidyverse` packages and `{MASS}` loaded so it's important to remember that you may need to make explicit which version of a particular function you want to use. 
 
-```{r}
+```{r, message=FALSE}
+ordinal_data <- read_csv("https://raw.githubusercontent.com/ajstewartlang/16_mixed_models_pt2/master/data/ordinal_data.csv")
+
 ordinal_data_tidied <- ordinal_data %>%
   mutate(Subject = factor(Subject), SportsType = factor(SportType)) %>%
   mutate(Ratings = ratings) %>%
@@ -298,6 +300,18 @@ We need to do one more thing before our data set is ready for modelling. We need
 
 ```{r}
 ordinal_data_tidied$Ratings <- as.ordered(ordinal_data_tidied$Ratings)
+```
+
+Let's have a look at our data.
+
+```{r}
+ordinal_data_tidied %>%
+  ggplot(aes(x = VideoCondition, y = Ratings, group = VideoCondition)) +
+  geom_jitter(aes(colour = VideoCondition), width = .1, alpha = .25, size = 5) + 
+  theme_minimal() +
+  guides(colour = FALSE) +
+  theme(text = element_text(size = 20)) +
+  stat_summary(fun = "median", size = 2, alpha = .5)
 ```
 
 
