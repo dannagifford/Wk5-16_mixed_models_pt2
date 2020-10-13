@@ -365,7 +365,7 @@ These data are from a repeated measures experiment where participants had to res
 
 Build the appropriate linear mixed model to model the outcome variable (`Time`) and determine whether it was predicted by the fixed effects of `Prime` and `Target`. Critically, we are interested in whether the interaction of these fixed effects predicts our outcome variable.
 
-Remember to set your contrast coding. If you find a singular fit warning, consider simplyfing your random effects structure. When you have a model you are happy with, use the performance::check_model() function to check the model assumptions. In your model, you should find a significant interaction effect. Exploring this with `emmeans()` should reveal a priming effect: Positive targets were responded to more quickly following Positive vs. Negative primes, and Negative targets were responded to more quickly following Negative vs. Positive primes. In both cases, this priming effect was around 40 ms.
+Remember to set your contrast coding. If you find a singular fit warning, consider simplyfing your random effects structure. When you have a model you are happy with, use the performance::check_model() function to check the model assumptions. In your model, you should find a significant interaction effect. Exploring this with `emmeans()` should reveal a priming effect: Positive targets were responded to more quickly following Positive vs. Negative primes, and Negative targets were responded to more quickly following Negative vs. Positive primes. In both cases, this priming effect was around 40ms.
 
 ## Part Two
 Read in the data file from here:
