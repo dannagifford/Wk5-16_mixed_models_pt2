@@ -359,6 +359,7 @@ There are two parts to your challenge.
 ## Part One
 
 Read in the dataset "factorial_data.csv" from here: 
+
 `https://raw.githubusercontent.com/ajstewartlang/16_mixed_models_pt2/master/data/factorial_data.csv`.  
 
 These data are from a repeated measures experiment where participants had to respond to a target word (measured by our DV which is labelled "Time").  The target word always followed a prime word. Prime and Target are our two factors – each with two levels – Positive vs. Negative.We are interested in whether there is a priming effect (i.e., Positive target words responded to more quickly after Positive than after Negative Primes, and Negative target words responded to more quickly after Negative than after Positive Primes). We need to build the appropriate LMM to determine whether this is indeed correct.
