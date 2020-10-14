@@ -13,7 +13,7 @@ regressions_data <- read_csv("https://raw.githubusercontent.com/ajstewartlang/16
 str(regressions_data)
 
 tidied_regressions_data <- regressions_data %>%
-  transmute(subject = factor(Subject), item = factor(Item), 
+  mutate(subject = factor(Subject), item = factor(Item), 
             condition = factor(Condition), DV = DV)
 
 str(tidied_regressions_data)
