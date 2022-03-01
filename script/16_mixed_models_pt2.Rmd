@@ -56,6 +56,7 @@ library(lme4)
 library(lmerTest)
 library(emmeans)
 library(performance)
+library(pbkrtest)
 ```
 
 Now we're going to read in our data and turn our `subject`, `item`, `context`, and `sentence` columns into factors.
@@ -206,7 +207,7 @@ Is this also the case for our Gamma model?
 emmeans(gamma_factorial_model, pairwise ~ context*sentence, adjust = "none")
 ```
 
-Yes, the interaction is being driven by reading times to Negative sentences in Negative vs. Positive contexts. 
+We see here that the pattern of pairwise comparisons is the same as with our previous linear model - the interaction is still being driven by reading times to Negative sentences in Negative vs. Positive contexts.
 
 ## Binomial Data
 
