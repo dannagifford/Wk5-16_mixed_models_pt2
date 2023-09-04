@@ -104,7 +104,7 @@ tidied_factorial_data %>%
   summarise(mean_rt = mean(RT), sd_rt = sd(RT))
 ```
 
-Let's visualise the data next. I'm using the `stat_summary()` function to add means and bootstrapped condidence intervals around those means for each of our conditions. I use the syntax `context:sentence` in the `aes()` expression to indicate that I want to plot all combinations of these two factors (i.e., the interactions). I use a few other aesthetic tweaks to make the graph look a little better than the default. I should have added a title - can you modify the code below to do that?
+Let's visualise the data next. Using the `stat_summary()` function lets us add means and bootstrapped condidence intervals around those means for each of our conditions. The syntax `context:sentence` in the `aes()` expression indicates that it should plot all combinations of these two factors (i.e., the interactions). There are a few other aesthetic tweaks used to make the graph look a little better than the default. Another alteration would be to add a title - can you modify the code below to do that?
 
 ```{r}
 tidied_factorial_data %>%
@@ -122,7 +122,7 @@ tidied_factorial_data %>%
 
 Before we build our model, we need to set the contrast coding for our factors. By default, R using dummy (treatment) coding (think back to how we used this in the context of understanding ANOVA as a case of regression). The problem with dummy coding for factorial designs is that you can end up misinterpreting simple effects (e.g., an effect of Factor 2 at one level of Factor 1) as a main effect (e.g., an effect of Factor 2 at the average of Factor 1). To address this, we can use sum or deviation coding. This will result in the Intercept of our model correspoding to the grand mean of our conditions (i.e., the mean of means) and makes the interpretation of our fixed effects (and any interaction effects) more straightforward. 
 
-If you're interested in reading more about this topic, I recommend this great paper by Schad and colleagues. Just click on the image below to be access it.
+If you're interested in reading more about this topic, see this great paper by Schad and colleagues. Just click on the image below to be access it.
 
 <center>
 
@@ -176,7 +176,7 @@ gamma_factorial_model <- glmer(RT ~ context * sentence +
                           data = tidied_factorial_data)
 ```
 
-In order to fit this model, I had to simplify the random effects terms and set nAGQ to 0 (its default is 1). This means our parameter estimates are a little less exact than if we had gone with the default (but at least the model converges on a solution). 
+In order to fit this model, we had to simplify the random effects terms and set nAGQ to 0 (its default is 1). This means our parameter estimates are a little less exact than if we had gone with the default (but at least the model converges on a solution). 
 
 Let's look at the summaries of our two models and see if they differ. First we'll look at our `factorial_model` which we built using `lmer()`.
 
@@ -211,7 +211,7 @@ We see here that the pattern of pairwise comparisons is the same as with our pre
 
 ## Binomial Data
 
-In the following video I will examine how you build a generalised linear mixed model where your dependent variable isn't continuous. I'll focus on binomial data (where your DV is either a 1 or a 0).
+The following video will examine how you build a generalised linear mixed model where your dependent variable isn't continuous. We will focus on binomial data (where your DV is either a 1 or a 0).
 
 <center>
 
@@ -277,7 +277,7 @@ We can then use the Likilhood Ratio Test to see if they differ (they don't).
 anova(binomial_model, null_binomial_model)
 ```
 
-If our binomial model (or the comparison between our binomial and null model) suggested an effect, we would use the `emmeans()` package to run pairwise comparisons between the different levels of our factor (as we did previously). We would also check our model assumptions by creating a binned residuals plots as I have done in the video above.
+If our binomial model (or the comparison between our binomial and null model) suggested an effect, we would use the `emmeans()` package to run pairwise comparisons between the different levels of our factor (as we did previously). We would also check our model assumptions by creating a binned residuals plots as done in the video above.
 
 ## Ordinal Data
 ### One Factor With Three Levels
@@ -304,7 +304,7 @@ library(ordinal)
 
 Let's read in our data an ensure our columns are coded appropriately. Our VideoCondition column is currently coded as 2, 3, or 4. 2 corresponds to the Match condition, 3 to Mismatch, and 4 as Neutral. Let's recode the levels of that factor with the labels instead of the numbers.
 
-Note, I am using the `select()` function to select the 4 key columns we need for our analysis. I have had to put `dplyr::` beforehand so that R know that it's the `select()` function that's part of the `{dplyr}` package from the `Tidyverse` that we want to use. There's also a function called `select()` in the `{MASS}` package - oftentimes you will have both the `Tidyverse` packages and `{MASS}` loaded so it's important to remember that you may need to make explicit which version of a particular function you want to use. 
+Note the use of the `select()` function to select the 4 key columns we need for our analysis. We have had to put `dplyr::` beforehand so that R know that it's the `select()` function that's part of the `{dplyr}` package from the `Tidyverse` that we want to use. There's also a function called `select()` in the `{MASS}` package - oftentimes you will have both the `Tidyverse` packages and `{MASS}` loaded so it's important to remember that you may need to make explicit which version of a particular function you want to use. 
 
 ```{r, message=FALSE}
 ordinal_data <- read_csv("https://raw.githubusercontent.com/ajstewartlang/16_mixed_models_pt2/master/data/ordinal_data.csv")
