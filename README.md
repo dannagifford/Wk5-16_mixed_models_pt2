@@ -1,1 +1,1 @@
-# 16_mixed_models_pt2
+# Workshop on Mixed-effects Models Part 2
