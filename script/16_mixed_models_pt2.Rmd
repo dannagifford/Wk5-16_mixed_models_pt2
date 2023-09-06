@@ -1,6 +1,8 @@
 ---
 title: "Mixed Models Part 2"
-author: ""
+author: 
+    - Dr Danna Gifford, Unit coordinator (2023), danna.gifford@manchester.ac.uk
+    - Prof Andrew Stewart, Original author (2020-2022), drandrewjstewart@gmail.com
 date: ""
 output: 
   html_document:
